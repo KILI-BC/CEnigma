@@ -123,7 +123,24 @@ reflector *reflector_create(const char type)
 
 plugboard *plugboard_create(const char key_str[])
 {
-    plugboard *p_ptr = malloc(sizeof(plugboard));
+    plugboard *p_ptr;
+    int i;
+
+    if(sizeof(key_str) != 26)
+        return NULL;
+
+    /*make sure only letter pairs are swapped*/
+    for (i = 0; i < 26; i++)
+    {
+        if(!islower(key_str[i]))
+            return NULL;
+        if(key_str[i] - 'a' == i)
+            return NULL;
+        if((key_str[key_str[i] - 'a'] - 'a') != i)
+            return NULL;
+    }
+
+    p_ptr = malloc(sizeof(plugboard));
     if(p_ptr == NULL)
         return NULL;
     p_ptr->k = key_create(key_str);
@@ -152,3 +169,29 @@ enigma *enigma_create(rotor *rotor_left, rotor *rotor_middle, rotor *rotor_right
 
     return e_ptr;
 }
+
+key *key_create(const char key_str[])
+{
+    char c;
+    int *key_ptr;
+
+    if(strlen(key_str) != 26)
+        return NULL;
+
+    /*check wether key_str contains all letters once*/
+    for (c = 'a'; c <= 'z'; c++) {
+        if (strchr(key_str, c) == NULL)
+            return NULL;
+    }
+
+    key_ptr = malloc(sizeof(key));
+
+    if (key_ptr == NULL)
+        return NULL;
+
+    for (c = 0; c < 26; c++)
+        key_ptr[c] = key_str[c] - 'a';
+
+    return key_ptr;
+}
+
