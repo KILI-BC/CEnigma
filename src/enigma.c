@@ -238,3 +238,24 @@ void key_destroy(key *k)
         return;
     free(k);
 }
+
+static error_msg key_encrypt(key *k, int i)
+{
+    if(i < 0 || i >= 26 || key_check(k) != ALL_FINE)
+        return INVALID_PARAMETERS;
+    return k[i];
+}
+
+static error_msg key_decrypt(key *k, int i)
+{
+    int idx;
+    if(i < 0 || i >= 26 || key_check(k) != ALL_FINE)
+        return INVALID_PARAMETERS;
+
+    for (idx = 0; idx < 26; idx++) {
+        if(k[idx] == i)
+        return idx;
+    }
+
+    return INVALID_PARAMETERS;
+}

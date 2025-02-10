@@ -1,6 +1,10 @@
 #ifndef ENIGMA_H_INCLUDED
 #define ENIGMA_H_INCLUDED
 
+typedef int error_msg;
+#define ALL_FINE 0
+#define INVALID_PARAMETERS 1
+
 typedef int key[26];
 
 typedef struct _reflector {
@@ -40,17 +44,17 @@ void plugboard_destroy(plugboard *p);
 void enigma_destroy(enigma *e);
 void key_destroy(key *k);
 
-void rotor_check(rotor *r);
-void reflector_check(reflector *r);
-void plugboard_check(plugboard *p);
-int enigma_check(enigma *e);
-int key_check(key *k);
+error_msg rotor_check(rotor *r);
+error_msg reflector_check(reflector *r);
+error_msg plugboard_check(plugboard *p);
+error_msg enigma_check(enigma *e);
+error_msg key_check(key *k);
 
-static void key_encrypt(key *k, int i);
-static void key_decrypt(key *k, int i);
+static error_msg key_encrypt(key *k, int i);
+static error_msg key_decrypt(key *k, int i);
 
 /*changes structs!*/
-void enigma_encrypt(enigma *e, char *text);
-void rotor_rotate(rotor *r);
+error_msg enigma_encrypt(enigma *e, char *text);
+error_msg rotor_rotate(rotor *r);
 
 #endif
