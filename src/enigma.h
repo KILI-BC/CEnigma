@@ -4,6 +4,7 @@
 typedef int error_msg;
 #define ALL_FINE 0
 #define INVALID_PARAMETERS 1
+#define ENCRYPTION_ERROR 2
 
 typedef int key[26];
 
@@ -52,13 +53,13 @@ error_msg key_check(key *k);
 
 static error_msg key_encrypt(key *k, int i);
 static error_msg key_decrypt(key *k, int i);
-static error_msg rotor_encrypt(rotor *r);
-static error_msg rotor_decrypt(rotor *r);
-static error_msg reflector_crypt(reflector *r);
-static error_msg plugboard_crypt(key *k, int i);
+static error_msg rotor_encrypt(rotor *r, int i);
+static error_msg rotor_decrypt(rotor *r, int i);
+static error_msg reflector_crypt(reflector *r, int i);
+static error_msg plugboard_crypt(plugboard *p, int i);
 
 /*changes structs!*/
-error_msg enigma_encrypt(enigma *e, char *text);
+error_msg enigma_encrypt(enigma *e, char text[]);
 error_msg rotor_rotate(rotor *r);
 
 #endif

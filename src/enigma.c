@@ -261,12 +261,76 @@ static error_msg key_decrypt(key *k, int i)
 }
 
 
+error_msg enigma_encrypt(enigma *e, char text[])
+{
+    int i, upper, let;
+    if(enigma_check(e) != ALL_FINE)
+        return INVALID_PARAMETERS;
+
+    for (i = 0; i < strlen(text); i++) {
+        if (!isalpha(text[i]))
+            continue;
+        upper = isupper(text[i]);
+        let = tolower(text[i]) - 'a';
+
+        /*step rotors*/
+        /*
+        if ((rotorshift[1] + 'a' == e_ptr->rotor_middle->turnover_markers[0]) ||
+            (rotorshift[1] + 'a' == e_ptr->rotor_middle->turnover_markers[1])) {
+            rotorshift[0] = roll_in_alphabet(rotorshift[0], 1, 26);
+            rotorshift[1] = roll_in_alphabet(rotorshift[1], 1, 26);
+            rotorshift[2] = roll_in_alphabet(rotorshift[2], 1, 26);
+        } else if ((rotorshift[2] + 'a' ==
+                    e_ptr->rotor_right->turnover_markers[0]) ||
+                   (rotorshift[2] + 'a' ==
+                    e_ptr->rotor_right->turnover_markers[1])) {
+            rotorshift[1] = roll_in_alphabet(rotorshift[1], 1, 26);
+            rotorshift[2] = roll_in_alphabet(rotorshift[2], 1, 26);
+        } else {
+            rotorshift[2] = roll_in_alphabet(rotorshift[2], 1, 26);
+        }*/
+
+        /*plugboard*/
+        if(plugboard_crypt(e->plugboard, let) != ALL_FINE)
+            return ENCRYPTION_ERROR;
+
+        /*rotors (right to left)*/
+        if(rotor_encrypt(e->rotor_right, let) != ALL_FINE)
+            return ENCRYPTION_ERROR;
+        if(rotor_encrypt(e->rotor_middle, let) != ALL_FINE)
+            return ENCRYPTION_ERROR;
+        if(rotor_encrypt(e->rotor_left, let) != ALL_FINE)
+            return ENCRYPTION_ERROR;
+
+        /*reflector*/
+        if(reflector_crypt(e->reflector, let) != ALL_FINE)
+            return ENCRYPTION_ERROR;
+
+        /*rotors (left to right)*/
+        if(rotor_decrypt(e->rotor_left, let) != ALL_FINE)
+            return ENCRYPTION_ERROR;
+        if(rotor_decrypt(e->rotor_middle, let) != ALL_FINE)
+            return ENCRYPTION_ERROR;
+        if(rotor_decrypt(e->rotor_right, let) != ALL_FINE)
+            return ENCRYPTION_ERROR;
+
+        /*plugboard*/
+        if(plugboard_crypt(e->plugboard, let) != ALL_FINE)
+            return ENCRYPTION_ERROR;
+
+        text[i] = upper ? let + 'A' : let + 'a';
+    }
+}
+
 error_msg rotor_rotate(rotor *r)
 {
     if(rotor_check(r) != ALL_FINE)
         return INVALID_PARAMETERS;
+
     (r->position)++;
+
     if(r->position >= 26)
         r->position = r->position - 26;
+
     return ALL_FINE;
 }
