@@ -195,3 +195,46 @@ key *key_create(const char key_str[])
     return key_ptr;
 }
 
+
+void rotor_destroy(rotor *r)
+{
+    if(r == NULL)
+        return;
+    key_destroy(r->k);
+    free(r);
+}
+
+void reflector_destroy(reflector *r)
+{
+    if(r == NULL)
+        return;
+    key_destroy(r->k);
+    free(r);
+}
+
+void plugboard_destroy(plugboard *p)
+{
+    if(p == NULL)
+        return;
+    key_destroy(p->k);
+    free(p);
+}
+
+void enigma_destroy(enigma *e)
+{
+    if(e == NULL)
+        return NULL;
+    rotor_destroy(e->rotor_left);
+    rotor_destroy(e->rotor_middle);
+    rotor_destroy(e->rotor_right);
+    reflector_destroy(e->reflector);
+    plugboard_destroy(e->plugboard);
+    free(e);
+}
+
+void key_destroy(key *k)
+{
+    if(k == NULL)
+        return;
+    free(k);
+}
