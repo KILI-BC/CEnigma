@@ -320,6 +320,7 @@ error_msg enigma_encrypt(enigma *e, char text[])
 
         text[i] = upper ? let + 'A' : let + 'a';
     }
+    return ALL_FINE;
 }
 
 error_msg rotor_rotate(rotor *r)
