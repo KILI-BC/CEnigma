@@ -259,3 +259,14 @@ static error_msg key_decrypt(key *k, int i)
 
     return INVALID_PARAMETERS;
 }
+
+
+error_msg rotor_rotate(rotor *r)
+{
+    if(rotor_check(r) != ALL_FINE)
+        return INVALID_PARAMETERS;
+    (r->position)++;
+    if(r->position >= 26)
+        r->position = r->position - 26;
+    return ALL_FINE;
+}

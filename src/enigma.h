@@ -14,6 +14,7 @@ typedef struct _reflector {
 typedef struct _rotor {
     int turnover_markers[2];
     int ring_setting;
+    int position;
     key *k;
 } rotor;
 
@@ -27,7 +28,6 @@ typedef struct _enigma {
     rotor *rotor_middle;
     rotor *rotor_right;
     plugboard *plugboard;
-    int rotor_positions[3];
 } enigma;
 
 static int roll_in_alphabet(int i, int shift, int alphabet_size);
@@ -52,6 +52,10 @@ error_msg key_check(key *k);
 
 static error_msg key_encrypt(key *k, int i);
 static error_msg key_decrypt(key *k, int i);
+static error_msg rotor_encrypt(rotor *r);
+static error_msg rotor_decrypt(rotor *r);
+static error_msg reflector_crypt(reflector *r);
+static error_msg plugboard_crypt(key *k, int i);
 
 /*changes structs!*/
 error_msg enigma_encrypt(enigma *e, char *text);
