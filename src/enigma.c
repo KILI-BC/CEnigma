@@ -19,18 +19,20 @@ static int roll_in_alphabet(int i, int shift, int alphabet_size)
 rotor *rotor_create(const char number[], int ring_setting)
 {
 	rotor *r_ptr;
-	int rotor_number, i;
+	int i, number_size = 0;
 	char* number_cpy;
     /*check ring setting*/
     if(ring_setting < 0 || ring_setting > 25)
         return NULL;
 
     /*copy number and convert to lower*/
-    number_cpy = malloc(sizeof(number));
+    for (i = 0; number[i] != '\0'; i++)
+        number_size++;
+    number_cpy = malloc(number_size);
 	if(number_cpy == NULL)
         return NULL;
     strcpy(number_cpy, number);
-    for (i = 0; i < strlen(number_cpy); i++)
+    for (i = 0; i < (int) strlen(number_cpy); i++)
         number_cpy[i] = tolower(number_cpy[i]);
 
     /*create rotor*/
@@ -43,30 +45,30 @@ rotor *rotor_create(const char number[], int ring_setting)
     r_ptr->turnover_markers[1] = -1;
     /*set key and turnover markers on used rotor*/
     if(strcmp(number_cpy, "i")){
-        r_ptr = key_create("ekmflgdqvzntowyhxuspaibrcj");
+        r_ptr->k = key_create("ekmflgdqvzntowyhxuspaibrcj");
         r_ptr->turnover_markers[0] = "q" - "a";
     } else if(strcmp(number_cpy, "ii")){
-        r_ptr = key_create("ajdksiruxblhwtmcqgznpyfvoe");
+        r_ptr->k = key_create("ajdksiruxblhwtmcqgznpyfvoe");
         r_ptr->turnover_markers[0] = "e" - "a";
     } else if(strcmp(number_cpy, "iii")){
-        r_ptr = key_create("bdfhjlcprtxvznyeiwgakmusqo");
+        r_ptr->k = key_create("bdfhjlcprtxvznyeiwgakmusqo");
         r_ptr->turnover_markers[0] = "v" - "a";
     } else if(strcmp(number_cpy, "iv")){
-        r_ptr = key_create("esovpzjayquirhxlnftgkdcmwb");
+        r_ptr->k = key_create("esovpzjayquirhxlnftgkdcmwb");
         r_ptr->turnover_markers[0] = "j" - "a";
     } else if(strcmp(number_cpy, "v")){
-        r_ptr = key_create("vzbrgityupsdnhlxawmjqofeck");
+        r_ptr->k = key_create("vzbrgityupsdnhlxawmjqofeck");
         r_ptr->turnover_markers[0] = "z" - "a";
     } else if(strcmp(number_cpy, "vi")){
-        r_ptr = key_create("jpgvoumfyqbenhzrdkasxlictw");
+        r_ptr->k = key_create("jpgvoumfyqbenhzrdkasxlictw");
         r_ptr->turnover_markers[0] = "z" - "a";
         r_ptr->turnover_markers[1] = "m" - "a";
     } else if(strcmp(number_cpy, "vii")){
-        r_ptr = key_create("nzjhgrcxmyswboufaivlpekqdt");
+        r_ptr->k = key_create("nzjhgrcxmyswboufaivlpekqdt");
         r_ptr->turnover_markers[0] = "z" - "a";
         r_ptr->turnover_markers[1] = "m" - "a";
     } else if(strcmp(number_cpy, "viii")){
-        r_ptr = key_create("fkqhtlxocbjspdzramewniuygv");
+        r_ptr->k = key_create("fkqhtlxocbjspdzramewniuygv");
         r_ptr->turnover_markers[0] = "z" - "a";
         r_ptr->turnover_markers[1] = "m" - "a";
     } else {
@@ -90,9 +92,7 @@ rotor *rotor_create(const char number[], int ring_setting)
 
 reflector *reflector_create(const char type)
 {
-    rotor *r_ptr;
-	int rotor_number, i;
-    char type_lower = tolower(type);
+    reflector *r_ptr;
     /*create reflector*/
     r_ptr = malloc(sizeof(reflector));
     if(r_ptr == NULL)
@@ -127,9 +127,6 @@ plugboard *plugboard_create(const char key_str[])
 {
     plugboard *p_ptr;
     int i;
-
-    if(sizeof(key_str) != 26)
-        return NULL;
 
     /*make sure only letter pairs are swapped*/
     for (i = 0; i < 26; i++)
@@ -174,15 +171,15 @@ enigma *enigma_create(rotor *rotor_left, rotor *rotor_middle, rotor *rotor_right
 
 key *key_create(const char key_str[])
 {
-    char c;
-    int *key_ptr;
+    int i;
+    key *key_ptr;
 
     if(strlen(key_str) != 26)
         return NULL;
 
     /*check wether key_str contains all letters once*/
-    for (c = 'a'; c <= 'z'; c++) {
-        if (strchr(key_str, c) == NULL)
+    for (i = 'a'; i <= 'z'; i++) {
+        if (strchr(key_str, i) == NULL)
             return NULL;
     }
 
@@ -191,8 +188,8 @@ key *key_create(const char key_str[])
     if (key_ptr == NULL)
         return NULL;
 
-    for (c = 0; c < 26; c++)
-        key_ptr[c] = key_str[c] - 'a';
+    for (i = 0; i < 26; i++)
+        (*key_ptr)[i] = key_str[i] - 'a';
 
     return key_ptr;
 }
@@ -225,7 +222,7 @@ void plugboard_destroy(plugboard *p)
 void enigma_destroy(enigma *e)
 {
     if(e == NULL)
-        return NULL;
+        return;
     rotor_destroy(e->rotor_left);
     rotor_destroy(e->rotor_middle);
     rotor_destroy(e->rotor_right);
@@ -307,14 +304,14 @@ error_msg key_check(key *k)
 
     for (i = 0; i < 26; i++)
     {
-        if(k[i] < 0 || k[i] >= 26)
+        if((*k)[i] < 0 || (*k)[i] >= 26)
             return INVALID_PARAMETERS;
-        arr[(int) k[i]]++;
+        arr[(*k)[i]]++;
     }
 
     for (i = 0; i < 26; i++)
     {
-        if(arr[1] != 1)
+        if(arr[i] != 1)
             return INVALID_PARAMETERS;
     }
 
@@ -323,7 +320,7 @@ error_msg key_check(key *k)
 
 static error_msg key_encrypt(key *k, int *i)
 {
-    if(i < 0 || i >= 26 || key_check(k) != ALL_FINE)
+    if(*i < 0 || *i >= 26 || key_check(k) != ALL_FINE)
         return INVALID_PARAMETERS;
     *i = *k[*i];
     return ALL_FINE;
@@ -332,11 +329,11 @@ static error_msg key_encrypt(key *k, int *i)
 static error_msg key_decrypt(key *k, int *i)
 {
     int idx;
-    if(i < 0 || i >= 26 || key_check(k) != ALL_FINE)
+    if(*i < 0 || *i >= 26 || key_check(k) != ALL_FINE)
         return INVALID_PARAMETERS;
 
     for (idx = 0; idx < 26; idx++) {
-        if(k[idx] == i){
+        if((*k)[idx] == *i){
             *i = idx;
             return ALL_FINE;
         }
@@ -384,11 +381,12 @@ static error_msg plugboard_crypt(plugboard *p, int *i)
 
 error_msg enigma_encrypt(enigma *e, char text[])
 {
-    int i, upper, *let;
+    int i, upper, j, *let;
+    let = &j;
     if(enigma_check(e) != ALL_FINE)
         return INVALID_PARAMETERS;
 
-    for (i = 0; i < strlen(text); i++) {
+    for (i = 0; i < (int) strlen(text); i++) {
         if (!isalpha(text[i]))
             continue;
         upper = isupper(text[i]);
