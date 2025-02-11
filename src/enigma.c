@@ -345,12 +345,29 @@ static error_msg key_decrypt(key *k, int *i)
     return INVALID_PARAMETERS;
 }
 
-static error_msg rotor_encrypt(rotor *r, int *i);
-static error_msg rotor_decrypt(rotor *r, int *i);
+static error_msg rotor_encrypt(rotor *r, int *i)
+{
+    if(rotor_check(r) != ALL_FINE || *i < 0 || *i > 26)
+        return INVALID_PARAMETERS;
+    roll_in_alphabet(*i, r->position, 26);
+    key_encrypt(r->k, i);
+    roll_in_alphabet(*i, -(r->position), 26);
+    return ALL_FINE;
+}
+
+static error_msg rotor_decrypt(rotor *r, int *i)
+{
+    if(rotor_check(r) != ALL_FINE || *i < 0 || *i > 26)
+        return INVALID_PARAMETERS;
+    roll_in_alphabet(*i, r->position, 26);
+    key_decrypt(r->k, i);
+    roll_in_alphabet(*i, -(r->position), 26);
+    return ALL_FINE;
+}
 
 static error_msg reflector_crypt(reflector *r, int *i)
 {
-    if(reflector_check(r) != ALL_FINE || i < 0 || i > 26)
+    if(reflector_check(r) != ALL_FINE || *i < 0 || *i > 26)
         return INVALID_PARAMETERS;
 
     return key_encrypt(r->k, i);
@@ -358,7 +375,7 @@ static error_msg reflector_crypt(reflector *r, int *i)
 
 static error_msg plugboard_crypt(plugboard *p, int *i)
 {
-    if(plugboard_check(p) != ALL_FINE || i < 0 || i > 26)
+    if(plugboard_check(p) != ALL_FINE || *i < 0 || *i > 26)
         return INVALID_PARAMETERS;
 
     return key_encrypt(p->k, i);
