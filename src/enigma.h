@@ -50,12 +50,12 @@ error_msg plugboard_check(plugboard *p);
 error_msg enigma_check(enigma *e);
 error_msg key_check(key *k);
 
-static error_msg key_encrypt(key *k, int i);
-static error_msg key_decrypt(key *k, int i);
-static error_msg rotor_encrypt(rotor *r, int i);
-static error_msg rotor_decrypt(rotor *r, int i);
-static error_msg reflector_crypt(reflector *r, int i);
-static error_msg plugboard_crypt(plugboard *p, int i);
+static error_msg key_encrypt(key *k, int *i);
+static error_msg key_decrypt(key *k, int *i);
+static error_msg rotor_encrypt(rotor *r, int *i);
+static error_msg rotor_decrypt(rotor *r, int *i);
+static error_msg reflector_crypt(reflector *r, int *i);
+static error_msg plugboard_crypt(plugboard *p, int *i);
 
 /*changes structs!*/
 error_msg enigma_encrypt(enigma *e, char text[]);

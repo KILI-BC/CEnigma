@@ -241,31 +241,133 @@ void key_destroy(key *k)
     free(k);
 }
 
-static error_msg key_encrypt(key *k, int i)
+error_msg rotor_check(rotor *r)
+{
+    if(r == NULL)
+        return INVALID_PARAMETERS;
+    if(r->position < 0 || r->position >= 26)
+        return INVALID_PARAMETERS;
+    if(r->turnover_markers[0] < 0 || r->turnover_markers[0] >= 26)
+        return INVALID_PARAMETERS;
+    if(r->turnover_markers[1] < -1 || r->turnover_markers[1] >= 26)
+        return INVALID_PARAMETERS;
+    if(key_check(r->k) != ALL_FINE)
+        return INVALID_PARAMETERS;
+
+    return ALL_FINE;
+}
+
+error_msg reflector_check(reflector *r)
+{
+    if(r == NULL)
+        return INVALID_PARAMETERS;
+    if(key_check(r->k) != ALL_FINE)
+        return INVALID_PARAMETERS;
+
+    return ALL_FINE;
+}
+
+error_msg plugboard_check(plugboard *p)
+{
+    if(p == NULL)
+        return INVALID_PARAMETERS;
+    if(key_check(p->k) != ALL_FINE)
+        return INVALID_PARAMETERS;
+
+    return ALL_FINE;
+}
+
+error_msg enigma_check(enigma *e)
+{
+    if(e == NULL)
+        return INVALID_PARAMETERS;
+    if(rotor_check(e->rotor_right) != ALL_FINE)
+        return INVALID_PARAMETERS;
+    if(rotor_check(e->rotor_middle) != ALL_FINE)
+        return INVALID_PARAMETERS;
+    if(rotor_check(e->rotor_left) != ALL_FINE)
+        return INVALID_PARAMETERS;
+    if(reflector_check(e->reflector) != ALL_FINE)
+        return INVALID_PARAMETERS;
+    if(plugboard_check(e->plugboard) != ALL_FINE)
+        return INVALID_PARAMETERS;
+
+    return ALL_FINE;
+}
+
+error_msg key_check(key *k)
+{
+    int i, arr[26];
+
+    if(k == NULL)
+        return INVALID_PARAMETERS;
+
+    for (i = 0; i < 26; i++)
+        arr[i] = 0;
+
+    for (i = 0; i < 26; i++)
+    {
+        if(k[i] < 0 || k[i] >= 26)
+            return INVALID_PARAMETERS;
+        arr[(int) k[i]]++;
+    }
+
+    for (i = 0; i < 26; i++)
+    {
+        if(arr[1] != 1)
+            return INVALID_PARAMETERS;
+    }
+
+    return ALL_FINE;
+}
+
+static error_msg key_encrypt(key *k, int *i)
 {
     if(i < 0 || i >= 26 || key_check(k) != ALL_FINE)
         return INVALID_PARAMETERS;
-    return k[i];
+    *i = *k[*i];
+    return ALL_FINE;
 }
 
-static error_msg key_decrypt(key *k, int i)
+static error_msg key_decrypt(key *k, int *i)
 {
     int idx;
     if(i < 0 || i >= 26 || key_check(k) != ALL_FINE)
         return INVALID_PARAMETERS;
 
     for (idx = 0; idx < 26; idx++) {
-        if(k[idx] == i)
-        return idx;
+        if(k[idx] == i){
+            *i = idx;
+            return ALL_FINE;
+        }
     }
 
     return INVALID_PARAMETERS;
 }
 
+static error_msg rotor_encrypt(rotor *r, int *i);
+static error_msg rotor_decrypt(rotor *r, int *i);
+
+static error_msg reflector_crypt(reflector *r, int *i)
+{
+    if(reflector_check(r) != ALL_FINE || i < 0 || i > 26)
+        return INVALID_PARAMETERS;
+
+    return key_encrypt(r->k, i);
+}
+
+static error_msg plugboard_crypt(plugboard *p, int *i)
+{
+    if(plugboard_check(p) != ALL_FINE || i < 0 || i > 26)
+        return INVALID_PARAMETERS;
+
+    return key_encrypt(p->k, i);
+}
+
 
 error_msg enigma_encrypt(enigma *e, char text[])
 {
-    int i, upper, let;
+    int i, upper, *let;
     if(enigma_check(e) != ALL_FINE)
         return INVALID_PARAMETERS;
 
@@ -273,7 +375,7 @@ error_msg enigma_encrypt(enigma *e, char text[])
         if (!isalpha(text[i]))
             continue;
         upper = isupper(text[i]);
-        let = tolower(text[i]) - 'a';
+        *let = tolower(text[i]) - 'a';
 
         /*step rotors*/
 
@@ -318,7 +420,7 @@ error_msg enigma_encrypt(enigma *e, char text[])
         if(plugboard_crypt(e->plugboard, let) != ALL_FINE)
             return ENCRYPTION_ERROR;
 
-        text[i] = upper ? let + 'A' : let + 'a';
+        text[i] = upper ? *let + 'A' : *let + 'a';
     }
     return ALL_FINE;
 }
