@@ -14,7 +14,6 @@ typedef struct _reflector {
 
 typedef struct _rotor {
     int turnover_markers[2];
-    int ring_setting;
     int position;
     key *k;
 } rotor;
@@ -33,7 +32,7 @@ typedef struct _enigma {
 
 static int roll_in_alphabet(int i, int shift, int alphabet_size);
 
-rotor *rotor_create(const char number[], int ringstellung);
+rotor *rotor_create(const char number[], int ring_setting);
 reflector *reflector_create(const char type);
 plugboard *plugboard_create(const char key_str[]);
 enigma *enigma_create(rotor *rotor_left, rotor *rotor_middle, rotor *rotor_right, reflector *r, plugboard *p);

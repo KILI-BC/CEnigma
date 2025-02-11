@@ -40,9 +40,8 @@ rotor *rotor_create(const char number[], int ring_setting)
         return NULL;
     }
 
-    r_ptr->ring_setting = ring_setting;
     r_ptr->turnover_markers[1] = -1;
-    /*set key and ring setting depending on used rotor*/
+    /*set key and turnover markers on used rotor*/
     if(strcmp(number_cpy, "i")){
         r_ptr = key_create("ekmflgdqvzntowyhxuspaibrcj");
         r_ptr->turnover_markers[0] = "q" - "a";
@@ -75,6 +74,9 @@ rotor *rotor_create(const char number[], int ring_setting)
         free(r_ptr);
         return NULL;
     }
+    r_ptr->turnover_markers[0] = roll_in_alphabet(r_ptr->turnover_markers[0], ring_setting, 26);
+    if(r_ptr->turnover_markers[1] != -1)
+        r_ptr->turnover_markers[1] = roll_in_alphabet(r_ptr->turnover_markers[1], ring_setting, 26);
 
     /*free in case of unsuccessful memory allocation for key*/
     if(r_ptr->k == NULL){
@@ -274,21 +276,19 @@ error_msg enigma_encrypt(enigma *e, char text[])
         let = tolower(text[i]) - 'a';
 
         /*step rotors*/
-        /*
-        if ((rotorshift[1] + 'a' == e_ptr->rotor_middle->turnover_markers[0]) ||
-            (rotorshift[1] + 'a' == e_ptr->rotor_middle->turnover_markers[1])) {
-            rotorshift[0] = roll_in_alphabet(rotorshift[0], 1, 26);
-            rotorshift[1] = roll_in_alphabet(rotorshift[1], 1, 26);
-            rotorshift[2] = roll_in_alphabet(rotorshift[2], 1, 26);
-        } else if ((rotorshift[2] + 'a' ==
-                    e_ptr->rotor_right->turnover_markers[0]) ||
-                   (rotorshift[2] + 'a' ==
-                    e_ptr->rotor_right->turnover_markers[1])) {
-            rotorshift[1] = roll_in_alphabet(rotorshift[1], 1, 26);
-            rotorshift[2] = roll_in_alphabet(rotorshift[2], 1, 26);
+
+        if ((e->rotor_middle->position == e->rotor_middle->turnover_markers[0]) ||
+            (e->rotor_middle->position == e->rotor_middle->turnover_markers[1])) {
+            rotor_rotate(e->rotor_right);
+            rotor_rotate(e->rotor_middle);
+            rotor_rotate(e->rotor_left);
+        } else if ((e->rotor_right->position == e->rotor_right->turnover_markers[0]) ||
+                   (e->rotor_right->position == e->rotor_right->turnover_markers[1])) {
+            rotor_rotate(e->rotor_right);
+            rotor_rotate(e->rotor_middle);
         } else {
-            rotorshift[2] = roll_in_alphabet(rotorshift[2], 1, 26);
-        }*/
+            rotor_rotate(e->rotor_right);
+        }
 
         /*plugboard*/
         if(plugboard_crypt(e->plugboard, let) != ALL_FINE)
