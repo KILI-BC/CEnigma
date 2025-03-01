@@ -4,3 +4,6 @@
 ### Credits
 Part of this program is taken from my work for
 [SEChat](https://github.com/b0iizz/SEChat)
+
+### Status
+This program is currently not fully functional
